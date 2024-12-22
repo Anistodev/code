@@ -6,6 +6,7 @@ fn greet(name: &str) -> String {
 
 mod models;
 mod settings;
+mod projects;
 
 use dirs;
 use models::Project;
@@ -13,6 +14,8 @@ use std::fs;
 use std::process::{Command, Stdio};
 use tauri::path::BaseDirectory;
 use tauri::Manager;
+use projects::{create_project, load_project, update_project, is_project_directory, get_projects_from_dir};
+
 
 #[tauri::command]
 async fn save_project(project: Project) -> Result<(), String> {
@@ -67,7 +70,7 @@ async fn delete_project(project_id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn update_project(project: Project) -> Result<(), String> {
+async fn old_update_project(project: Project) -> Result<(), String> {
     let app_dir = dirs::config_dir().ok_or("Failed to get app directory")?;
     let projects_dir = app_dir.join("projects");
     let file_path = projects_dir.join(format!("{}.json", project.id));
@@ -187,9 +190,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             save_project,
-            load_projects,
             delete_project,
-            update_project,
             get_app_data_dir,
             export_project,
             compile_msg,
@@ -200,6 +201,11 @@ pub fn run() {
             settings::set_string_setting,
             settings::get_all_settings,
             settings::remove_setting,
+            create_project,
+            load_project,
+            update_project,
+            is_project_directory,
+            get_projects_from_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

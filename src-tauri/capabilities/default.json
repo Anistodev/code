@@ -16,6 +16,10 @@
     "dialog:default",
     "fs:scope-resource",
     "fs:allow-read-text-file",
-    "fs:allow-resource-read-recursive"
+    "fs:allow-resource-read-recursive",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [{ "path": "$DOCUMENT/anistoprojects/*" }]
+    }
   ]
 }

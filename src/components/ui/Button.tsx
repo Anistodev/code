@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "cva";
 import { ComponentProps } from "solid-js";
 
 const styles = cva({
-  base: "transition-colors",
+  base: "transition-colors select-none",
   variants: {
     variant: {
       primary: "bg-primary text-text hover:bg-primary/90",
