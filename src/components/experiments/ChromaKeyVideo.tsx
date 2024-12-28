@@ -6,6 +6,7 @@ interface ChromaKeyVideoProps {
   similarity?: number; // How similar colors need to be to be removed (0-1)
   smoothness?: number; // Edge smoothness (0-1)
   class?: string;
+  muted?: boolean;
 }
 
 const ChromaKeyVideo: Component<ChromaKeyVideoProps> = (props) => {
@@ -88,7 +89,7 @@ const ChromaKeyVideo: Component<ChromaKeyVideoProps> = (props) => {
         src={props.src}
         autoplay
         loop
-        muted
+        muted={props.muted}
         style={{ display: 'none' }}
       />
 

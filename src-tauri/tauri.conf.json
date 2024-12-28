@@ -15,7 +15,8 @@
         "title": "Anisto",
         "width": 1280,
         "height": 780,
-        "decorations": false
+        "decorations": false,
+        "shadow": false
       }
     ],
     "security": {

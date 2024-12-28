@@ -1,12 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { z } from "zod";
+import { RustFileTreeItem } from "..";
 
 export const projectConfigSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
-  created_at: z.date(),
-  updated_at: z.date(),
+  created_at: z.string(),
+  updated_at: z.string(),
   version: z.string(),
+  path: z.string(),
 });
 
 export const fileAttributesSchema = z.object({
@@ -31,17 +33,28 @@ export const projectFileSchema = z.object({
 export type ProjectConfig = z.infer<typeof projectConfigSchema>;
 export type ProjectFile = z.infer<typeof projectFileSchema>;
 
+interface ProjectResponse {
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  version: string;
+}
+
 export class ProjectSystem {
   static async createProject(path: string, name: string, description?: string): Promise<void> {
     await invoke('create_project', { path, name, description });
   }
 
   static async loadProject(path: string): Promise<ProjectConfig> {
-    const config = await invoke<any>('load_project', { path });
+    const config = await invoke<ProjectResponse>('load_project', { path });
     return {
-      ...config,
-      created_at: new Date(config.created_at),
-      updated_at: new Date(config.updated_at),
+      name: config.name,
+      description: config.description,
+      created_at: config.created_at,
+      updated_at: config.updated_at,
+      version: config.version,
+      path
     };
   }
 
@@ -54,6 +67,20 @@ export class ProjectSystem {
   }
 
   static async getProjectsFromDir(path: string): Promise<ProjectConfig[]> {
-    return await invoke('get_projects_from_dir', { path });
+    const projects = await invoke<ProjectResponse[]>('get_projects_from_dir', { path });
+    return projects.map(project => ({
+      ...project,
+      created_at: project.created_at,
+      updated_at: project.updated_at,
+      path: path + "\\" + project.name.replace(/\s+/g, "_")
+    }));
+  }
+
+  static async listFiles(projectPath: string): Promise<RustFileTreeItem[]> {
+    return await invoke("list_files", { projectPath });
+  }
+
+  static async createFile(projectPath: string, name: string, isFolder: boolean): Promise<void> {
+    await invoke("create_file", { projectPath, name, isFolder });
   }
 } 

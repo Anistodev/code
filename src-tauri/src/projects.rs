@@ -33,6 +33,14 @@ pub struct FileAttributes {
     pub character_checkbox: Option<bool>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FileTreeItem {
+    pub name: String,
+    pub path: String,
+    pub is_dir: bool,
+    pub children: Option<Vec<FileTreeItem>>,
+}
+
 pub struct ProjectManager;
 
 impl ProjectManager {
@@ -91,6 +99,81 @@ impl ProjectManager {
         }
         projects
     }
+
+    pub fn create_file(project_path: &Path, name: &str, is_folder: bool) -> Result<(), String> {
+        let target_path = project_path.join(name);
+        
+        if is_folder {
+            fs::create_dir_all(&target_path).map_err(|e| e.to_string())?;
+        } else {
+            // Ensure the file has .msg extension
+            let file_name = if !name.ends_with(".msg") {
+                format!("{}.msg", name)
+            } else {
+                name.to_string()
+            };
+            let target_path = project_path.join(file_name);
+            
+            // Create an empty file
+            fs::write(&target_path, "").map_err(|e| e.to_string())?;
+        }
+
+        Ok(())
+    }
+
+    pub fn list_files(project_path: &Path) -> Result<Vec<FileTreeItem>, String> {
+        Self::list_files_recursive(project_path, project_path)
+    }
+
+    fn list_files_recursive(base_path: &Path, current_path: &Path) -> Result<Vec<FileTreeItem>, String> {
+        let entries = fs::read_dir(current_path).map_err(|e| e.to_string())?;
+        let mut items = Vec::new();
+
+        for entry in entries {
+            let entry = entry.map_err(|e| e.to_string())?;
+            let path = entry.path();
+            let file_name = entry.file_name();
+            let file_name = file_name.to_string_lossy().into_owned();
+            
+            // Skip .anisto directory and any other hidden files
+            if !file_name.starts_with('.') {
+                let relative_path = path.strip_prefix(base_path)
+                    .map_err(|e| e.to_string())?
+                    .to_string_lossy()
+                    .into_owned();
+
+                let is_dir = path.is_dir();
+                let children = if is_dir {
+                    Some(Self::list_files_recursive(base_path, &path)?)
+                } else {
+                    None
+                };
+
+                items.push(FileTreeItem {
+                    name: file_name,
+                    path: relative_path,
+                    is_dir,
+                    children,
+                });
+            }
+        }
+
+        // Sort items: directories first, then files, both alphabetically
+        items.sort_by(|a, b| {
+            match (a.is_dir, b.is_dir) {
+                (true, false) => std::cmp::Ordering::Less,
+                (false, true) => std::cmp::Ordering::Greater,
+                _ => a.name.cmp(&b.name),
+            }
+        });
+
+        Ok(items)
+    }
+
+    pub fn read_msg_file(path: &Path) -> Result<String, String> {
+        let file_content = fs::read_to_string(path).map_err(|e| e.to_string())?;
+        Ok(file_content)
+    }
 }
 
 #[tauri::command]
@@ -116,4 +199,19 @@ pub async fn is_project_directory(path: String) -> bool {
 #[tauri::command]
 pub async fn get_projects_from_dir(path: String) -> Vec<ProjectConfig> {
     ProjectManager::get_projects_from_dir(Path::new(&path))
+}
+
+#[tauri::command]
+pub async fn create_file(project_path: String, name: String, is_folder: bool) -> Result<(), String> {
+    ProjectManager::create_file(Path::new(&project_path), &name, is_folder)
+}
+
+#[tauri::command]
+pub async fn list_files(project_path: String) -> Result<Vec<FileTreeItem>, String> {
+    ProjectManager::list_files(Path::new(&project_path))
+}
+
+#[tauri::command]
+pub async fn read_msg_file(path: String) -> Result<String, String> {
+    ProjectManager::read_msg_file(Path::new(&path))
 }

@@ -14,7 +14,7 @@ use std::fs;
 use std::process::{Command, Stdio};
 use tauri::path::BaseDirectory;
 use tauri::Manager;
-use projects::{create_project, load_project, update_project, is_project_directory, get_projects_from_dir};
+use projects::{create_project, load_project, update_project, is_project_directory, get_projects_from_dir, list_files, create_file, read_msg_file};
 
 
 #[tauri::command]
@@ -205,7 +205,10 @@ pub fn run() {
             load_project,
             update_project,
             is_project_directory,
-            get_projects_from_dir
+            get_projects_from_dir,
+            list_files,
+            create_file,
+            read_msg_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

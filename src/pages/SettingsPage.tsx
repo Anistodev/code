@@ -389,7 +389,13 @@ const UiExperiments: Component<{ setShowVideo: (show: boolean) => void }> = (
             onFileSelect={(file) => {
               console.log("Selected file:", file);
             }}
-            selectedFileId="3" // ID of currently selected file
+            selectedFileId="3"
+            onCreateFile={(parentId) => {
+              console.log("Create file in folder:", parentId);
+            }}
+            onDeleteFile={(fileId) => {
+              console.log("Delete file:", fileId);
+            }}
           />
         </div>
       </FocusModal>
