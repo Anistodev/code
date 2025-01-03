@@ -1,5 +1,17 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum BoxType {
+    Help,
+    Message,
+    Mind,
+    System,
+    Trivia,
+    Devil,
+    Progress,
+    Unknown,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct FileAttributes {
     pub lipsync: Option<bool>,
@@ -41,4 +53,40 @@ pub struct MessageAttributes {
 pub struct SerializableMessage {
     pub content: String,
     pub attributes: MessageAttributes,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SerializedMessage {
+    pub content: String,
+    pub flags: SerializedMessageFlags,
+    pub header: SerializedMessageHeader,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SerializedMessageFlags {
+    pub has_lipsync: bool,
+    pub wait_for_input: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SerializedMessageHeader {
+    pub box_type: BoxType,
+    pub message_id: String,
+    pub character: Option<String>,
+}
+
+// TODO: kill this with fire
+impl From<royal::BoxType> for BoxType {
+    fn from(box_type: royal::BoxType) -> Self {
+        match box_type {
+            royal::BoxType::Help => BoxType::Help,
+            royal::BoxType::Message => BoxType::Message,
+            royal::BoxType::Mind => BoxType::Mind,
+            royal::BoxType::System => BoxType::System,
+            royal::BoxType::Trivia => BoxType::Trivia,
+            royal::BoxType::Devil => BoxType::Devil,
+            royal::BoxType::Progress => BoxType::Progress,
+            _ => BoxType::Unknown,
+        }
+    }
 }

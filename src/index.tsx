@@ -84,7 +84,6 @@ function RootLayout(props: any) {
   createEffect(() => {
     // Try to load the last project and route from localStorage
     const savedProject = localStorage.getItem("currentProject");
-    const savedRoute = localStorage.getItem("currentRoute");
     
     if (savedProject) {
       try {
@@ -93,10 +92,10 @@ function RootLayout(props: any) {
           .then((loadedProject) => {
             setProject(loadedProject);
             loadFiles();
-            // Navigate to saved route or default to /editor
-            if (savedRoute) {
-              navigate(savedRoute);
-            }
+            // // Navigate to saved route or default to /editor
+            // if (savedRoute) {
+            //   navigate(savedRoute);
+            // }
           })
           .catch(console.error);
       } catch (error) {

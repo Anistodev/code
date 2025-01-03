@@ -6,9 +6,9 @@ import { useNavigate } from "@solidjs/router";
 
 export const Editor: Component = () => {
   const [showVideo, setShowVideo] = createSignal(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const { project } = useProject();
+  const { project, selectedFile } = useProject();
 
   createEffect(() => {
     if (showVideo()) {
@@ -16,7 +16,9 @@ export const Editor: Component = () => {
         setShowVideo(false);
       }, 18000);
     }
+  });
 
+  createEffect(() => {
     if (project == null) {
       navigate("/");
     }
@@ -24,13 +26,9 @@ export const Editor: Component = () => {
 
   return (
     <div class="flex-1 flex flex-col bg-background">
-      {/* <KeybindListener
-        actions={{
-          ü: () => {
-            setShowVideo(true);
-          },
-        }}
-      /> */}
+      <KeybindListener actions={{
+        ü: () => setShowVideo(true)
+      }} />
       <Show when={showVideo()}>
         <div class="z-50 absolute top-0 left-0">
           <ChromaKeyVideo
@@ -44,7 +42,7 @@ export const Editor: Component = () => {
         </div>
       </Show>
       <Show
-        when={false}
+        when={selectedFile != null}
         fallback={
           <div class="flex items-center justify-center h-96 flex-col gap-4">
             <p class="text-zinc-400 text-lg font-medium">No file selected</p>
@@ -52,8 +50,9 @@ export const Editor: Component = () => {
           </div>
         }
       >
-        <div class="text-text font-outfit">
-          {/* File content will go here */}
+        <div class="text-text font-outfit p-4">
+          <h2 class="text-lg font-medium mb-4">{selectedFile}</h2>
+          <pre class="whitespace-pre-wrap">{JSON.stringify(selectedFile)}</pre>
         </div>
       </Show>
     </div>

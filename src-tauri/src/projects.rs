@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+use royal::Message;
+use crate::models::{SerializedMessage, SerializedMessageFlags, SerializedMessageHeader, BoxType};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectConfig {
@@ -170,9 +172,23 @@ impl ProjectManager {
         Ok(items)
     }
 
-    pub fn read_msg_file(path: &Path) -> Result<String, String> {
-        let file_content = fs::read_to_string(path).map_err(|e| e.to_string())?;
-        Ok(file_content)
+    pub fn read_msg_file(path: &Path) -> Result<Vec<SerializedMessage>, String> {
+        let msg_content = Message::parse_msg(path.to_str().unwrap());
+        let serialized_messages = msg_content.into_iter()
+            .map(|msg| SerializedMessage {
+                content: msg.content,
+                flags: SerializedMessageFlags {
+                    has_lipsync: msg.flags.has_lipsync,
+                    wait_for_input: msg.flags.wait_for_input,
+                },
+                header: SerializedMessageHeader {
+                    box_type: msg.header.box_type.into(),
+                    message_id: msg.header.message_id,
+                    character: msg.header.character,
+                }
+            })
+            .collect();
+        Ok(serialized_messages)
     }
 }
 
@@ -212,6 +228,6 @@ pub async fn list_files(project_path: String) -> Result<Vec<FileTreeItem>, Strin
 }
 
 #[tauri::command]
-pub async fn read_msg_file(path: String) -> Result<String, String> {
+pub async fn read_msg_file(path: String) -> Result<Vec<SerializedMessage>, String> {
     ProjectManager::read_msg_file(Path::new(&path))
 }
