@@ -5,7 +5,7 @@ import type { ProjectConfig } from "../lib/projectSystem";
 interface ProjectContextState {
   project: ProjectConfig | null;
   setProject: (project: ProjectConfig | null) => void;
-  selectedFile: string | null;
+  getSelectedFile: () => string | null;
   setSelectedFile: (file: string | null) => void;
 }
 
@@ -36,7 +36,7 @@ export function ProjectProvider(props: { children: any }) {
         localStorage.removeItem("currentProject");
       }
     },
-    get selectedFile() {
+    getSelectedFile() {
       return state.selectedFile;
     },
     setSelectedFile(file: string | null) {

@@ -102,9 +102,9 @@ const ProjectListPage: Component = () => {
         <WindowControls appWindow={appWindow} />
       </header>
 
-      <div class="flex flex-1">
+      <div class="flex flex-1 overflow-y-auto border-b border-r border-l border-zinc-800">
         <main class="flex-1 overflow-y-auto">
-          <div class="flex flex-col p-8 max-w-6xl mx-auto">
+          <div class="flex flex-col p-7 max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-8">
               <div>
                 <h1 class="text-3xl font-medium text-text">Projects</h1>

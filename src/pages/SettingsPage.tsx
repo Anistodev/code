@@ -25,11 +25,8 @@ import Switch from "../components/ui/Switch";
 import ChromaKeyVideo from "../components/experiments/ChromaKeyVideo";
 import FocusModal from "../components/ui/FocusModal";
 import FileTree from "../components/FileTree";
-import { WindowControls } from "../components/WindowControls";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const SettingsPage: Component = () => {
-  const appWindow = getCurrentWindow();
   const [showVideo, setShowVideo] = createSignal(false);
 
   createEffect(() => {
@@ -42,17 +39,7 @@ const SettingsPage: Component = () => {
 
   return (
     <>
-      <div class="flex flex-col font-outfit h-screen">
-        {/* App Header */}
-        <header
-          class="h-[30px] bg-secondary flex items-center select-none border-b border-zinc-800"
-          data-tauri-drag-region
-        >
-          <div class="text-text text-md px-[0.6rem]">Anisto</div>
-
-          {/* Window Controls */}
-          <WindowControls appWindow={appWindow} />
-        </header>
+      <div class="flex flex-col font-outfit">
 
         {/* Main Content */}
         <main class="flex flex-1">
@@ -64,6 +51,7 @@ const SettingsPage: Component = () => {
                 smoothness={0}
                 similarity={0.7}
                 class="w-screen h-screen"
+                muted
               />
             </div>
           </Show>
@@ -86,11 +74,13 @@ const SettingsPage: Component = () => {
                   label: "Experiments",
                   content: <UiExperiments setShowVideo={setShowVideo} />,
                 },
+                /*
                 {
                   id: "feature-flags",
                   label: "Feature Flags",
                   content: <FeatureFlags />,
                 },
+                */
               ]}
             />
           </div>
@@ -170,7 +160,7 @@ const CompilerSettings: Component = () => {
         </Button>
       </div>
 
-      <div class="absolute right-32">
+      <div class="absolute right-12">
         <p class="text-sm text-zinc-400">Test compiler flags</p>
         <div class="flex flex-col font-sans bg-primary overflow-y-auto p-2 border border-zinc-800 w-[35rem] h-[30rem] min-w-[35rem] min-h-[30rem] gap-2">
           <p class="text-sm text-text">{compilerOutput()}</p>

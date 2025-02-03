@@ -173,3 +173,14 @@ export const findRandomNumbers = (name: string) => {
     return [null, null, null]; 
   }
 };
+
+export interface IPreviewSettings {
+  msg_id: string,
+  content: string,
+  boxType?: string;
+}
+
+export const processCodePreview = (previewSettings: IPreviewSettings) => {
+  return `[msg ${previewSettings.boxType}_${previewSettings.msg_id}]
+[s]${previewSettings.content}[f 1 3 65535][w][e]`
+}

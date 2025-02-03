@@ -39,11 +39,18 @@ export const HighlightColors = [
   { label: "Very light brown", value: "29" }
 ];
 
+/**
+ * @deprecated dont use this fucking abomination
+ */
 export const DPadOptions = [
   { label: "DPad Up", value: "[f 0 1 2]" },
   { label: "DPad Down", value: "down" },
   { label: "DPad Left", value: "left" },
   { label: "DPad Right", value: "right" },
+];
+
+export const Icons = [
+  { label: "Intelligence", value: "[f 0 1 2]" }
 ];
 
 export const PreviewModes = [

@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
-import { Route, Router, useNavigate } from "@solidjs/router";
+import { A, Route, Router, useNavigate } from "@solidjs/router";
 import App from "./App";
 import { ProjectProvider, useProject } from "./context/projectContext";
 import { PortraitConfigProvider } from "./context/portraitConfigProvider";
@@ -16,7 +16,7 @@ import KeybindListener from "./components/KeybindListener";
 import ProjectListPage from "./pages/ProjectListPage";
 import { ProjectSystem } from "./lib/projectSystem";
 import Button from "./components/ui/Button";
-import { FolderPlus, FilePlus } from "lucide-solid";
+import { FolderPlus, FilePlus, Undo2 } from "lucide-solid";
 import Modal from "./components/Modal";
 import Input from "./components/ui/Input";
 import { invoke } from "@tauri-apps/api/core";
@@ -24,7 +24,7 @@ import { invoke } from "@tauri-apps/api/core";
 interface FileTreeItem {
   id: string;
   name: string;
-  type: 'file' | 'folder';
+  type: "file" | "folder";
   children?: FileTreeItem[];
 }
 
@@ -36,11 +36,11 @@ export interface RustFileTreeItem {
 }
 
 const buildFileTree = (files: RustFileTreeItem[]): FileTreeItem[] => {
-  return files.map(file => ({
+  return files.map((file) => ({
     id: file.path,
     name: file.name,
-    type: file.is_dir ? 'folder' : 'file',
-    children: file.children ? buildFileTree(file.children) : undefined
+    type: file.is_dir ? "folder" : "file",
+    children: file.children ? buildFileTree(file.children) : undefined,
   }));
 };
 
@@ -58,7 +58,7 @@ function RootLayout(props: any) {
 
   const loadFiles = async () => {
     if (!project) return;
-    
+
     try {
       const fileList = await ProjectSystem.listFiles(project.path);
       const fileTree = buildFileTree(fileList);
@@ -84,7 +84,7 @@ function RootLayout(props: any) {
   createEffect(() => {
     // Try to load the last project and route from localStorage
     const savedProject = localStorage.getItem("currentProject");
-    
+
     if (savedProject) {
       try {
         const parsed = JSON.parse(savedProject);
@@ -110,14 +110,16 @@ function RootLayout(props: any) {
   // Add effect to save current route
   createEffect(() => {
     const currentPath = window.location.pathname;
-    if (currentPath.startsWith('/editor')) {
+    if (currentPath.startsWith("/editor")) {
       localStorage.setItem("currentRoute", currentPath);
     }
   });
 
   const handleFileSelect = async (file: FileTreeItem) => {
     setSelectedFile(file.name);
-    const content = await invoke("read_msg_file", { path: `${project?.path}\\${file.name}` });
+    const content = await invoke("read_msg_file", {
+      path: `${project?.path}\\${file.name}`,
+    });
     console.log(content);
   };
 
@@ -128,15 +130,20 @@ function RootLayout(props: any) {
         class="h-[30px] bg-secondary flex items-center select-none border-b border-zinc-800"
         data-tauri-drag-region
       >
-        <div class="text-text text-md px-[0.6rem]">
-          Anisto
-        </div>
+        <div class="text-text text-md px-[0.6rem]">Anisto</div>
 
         {/* Project Menu */}
         <ProjectMenu
-          isOpen={menubar() === "project"}
+          isOpen={menubar() ? true : false /*kill this with fire*/}
+          menu={menubar()}
           onToggle={() => setMenubar((m) => (m === "project" ? "" : "project"))}
         />
+        {/* 
+        <A href="/editor/settings">
+        <Button>
+          ayarlar
+        </Button>
+        </A> */}
 
         {/* Window Controls */}
         <WindowControls appWindow={appWindow} />
@@ -176,6 +183,16 @@ function RootLayout(props: any) {
               >
                 <FilePlus class="w-4 h-4" />
               </Button>
+
+              <A href="/editor">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={location.pathname === "/editor"}
+                >
+                  <Undo2 class="size-4" />
+                </Button>
+              </A>
             </div>
             <div class="flex-1 overflow-y-auto">
               <FileTree onFileSelect={handleFileSelect} items={files()} />
@@ -184,7 +201,14 @@ function RootLayout(props: any) {
         </div>
 
         {/* Main Content Area */}
-        <main class="flex-1 overflow-y-auto">{props.children}</main>
+        <main
+          class="flex-1 overflow-y-auto border-b border-r border-l border-zinc-800"
+          onClick={() => {
+            setMenubar("");
+          }}
+        >
+          {props.children}
+        </main>
       </div>
 
       {/* Create File Modal */}
